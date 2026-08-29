@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>cola-wzb的视频同款资源</title>
+<style>
+  /* ============ 基础重置 ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --sunset: #ffb677;
+    --sunset-2: #ff8e6e;
+    --glass-bg: rgba(255, 255, 255, 0.14);
+    --glass-bg-strong: rgba(255, 255, 255, 0.22);
+    --glass-border: rgba(255, 255, 255, 0.35);
+    --text: #fff;
+    --text-dim: rgba(255, 255, 255, 0.78);
+    --shadow: rgba(30, 20, 40, 0.35);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem 4rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ============ 日落背景 ============ */
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: url("日落.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: saturate(1.05);
+  }
+
+  /* 背景轻微变暗 + 顶底渐晕，让玻璃更突出 */
+  .bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(20, 16, 32, 0.25) 0%, rgba(20, 16, 32, 0.05) 40%, rgba(20, 16, 32, 0.35) 100%);
+  }
+
+  /* 漂浮的彩色光斑 —— 增加"液体"折射氛围 */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(70px);
+    opacity: 0.55;
+    animation: float 14s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .blob.a { width: 320px; height: 320px; background: #ffd9a0; top: 12%; left: 8%; }
+  .blob.b { width: 380px; height: 380px; background: #ff8e6e; bottom: 10%; right: 6%; animation-delay: -5s; }
+  .blob.c { width: 260px; height: 260px; background: #f7b7ff; top: 45%; left: 55%; animation-delay: -9s; opacity: 0.4; }
+
+  @keyframes float {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(30px, -40px) scale(1.08); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+
+  .container { width: 100%; max-width: 1080px; position: relative; }
+
+  /* ============ 通用玻璃面板 ============
+     多层边框 + 内高光 + backdrop blur，做出液态玻璃质感 */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow:
+      0 20px 50px var(--shadow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  /* ============ 大标题 ============ */
+  h1 {
+    text-align: center;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 1.1rem 1.6rem;
+    border-radius: 24px;
+    margin-bottom: 2.2rem;
+    display: inline-block;
+    width: 100%;
+    text-shadow: 0 3px 18px rgba(0, 0, 0, 0.35);
+    background: linear-gradient(135deg, #fff2e0 0%, #ffd9a8 45%, #ffae7a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 标题仍是玻璃底，但文字用渐变 */
+  .title-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.6rem;   /* 标题下移出空间，避免碰到下方分类栏 */
+  }
+  .title-glass {
+    border-radius: 999px;
+    padding: 0.35rem;
+  }
+  .title-glass h1 {
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border: none;
+    padding: 1.15rem 2.2rem;
+    margin: 0;
+    display: block;
+  }
+
+  /* ============ 分类标签栏(药丸形玻璃) ============ */
+  .tabbar-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2.6rem;
+  }
+
+  .tabbar {
+    display: flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 6px;
+    gap: 0;
+  }
+
+  .tab {
+    position: relative;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: inherit;
+    padding: 0.72rem 1.55rem;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: color 0.25s ease, background 0.3s ease, box-shadow 0.3s ease;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  /* 给每个标签预留右侧空隙，让斜杠不贴着选中框 */
+  .tab:not(:last-child) {
+    margin-right: 1.5rem;
+  }
+
+  /* 斜杠风格分隔线，呼应草图 */
+  .tab:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -1rem;               /* 落在预留空隙中央 */
+    top: 50%;
+    width: 1px;
+    height: 52%;
+    transform: translateY(-50%) rotate(20deg);
+    background: var(--glass-border);
+  }
+
+  .tab:hover { color: #fff; text-shadow: 0 0 12px rgba(255, 220, 170, 0.7); }
+
+  .tab.active {
+    color: #5c2e1a;
+    background: linear-gradient(135deg, #ffe7c4, #ffb677);
+    box-shadow: 0 8px 20px rgba(255, 160, 90, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  /* ============ 资源卡片网格 ============ */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.6rem;
+  }
+
+  .card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 22px;
+    padding: 1.7rem 1.6rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(.2,.7,.3,1), box-shadow 0.3s ease, background 0.3s ease;
+  }
+
+  /* 玻璃表面的一束高光扫过 */
+  .card::before {
+    content: "";
+    position: absolute;
+    top: -60%;
+    left: -80%;
+    width: 60%;
+    height: 220%;
+    background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: rotate(15deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .card:hover::before { left: 130%; }
+
+  .card:hover {
+    transform: translateY(-8px);
+    background: var(--glass-bg-strong);
+    box-shadow:
+      0 26px 60px rgba(40, 20, 30, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 0 0 1px rgba(255, 210, 160, 0.35);
+  }
+
+  .card .badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fff3e0;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.55rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .card p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.3rem;
+  }
+
+  .card .open {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 700;
+    color: #fff2df;
+    font-size: 0.95rem;
+  }
+  .card .open::after {
+    content: "→";
+    transition: transform 0.25s ease;
+  }
+  .card:hover .open::after { transform: translateX(5px); }
+
+  /* 右上角箭头 */
+  .card .arrow {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.3rem;
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+  .card:hover .arrow { color: #ffe7c4; transform: translate(3px, -3px); }
+
+  /* 空状态 */
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-dim);
+    padding: 3.2rem 1rem;
+    border-radius: 22px;
+    background: var(--glass-bg);
+    border: 1px dashed var(--glass-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .empty span {
+    font-size: 2.4rem;
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+
+  /* 页脚 */
+  footer {
+    margin-top: 3.6rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.85rem;
+    letter-spacing: 0.4px;
+  }
+  footer a { color: #ffe7c4; text-decoration: none; font-weight: 600; }
+
+  /* 小屏适配 */
+  @media (max-width: 560px) {
+    body { padding: 2rem 1rem 3rem; }
+    .tabbar { flex-wrap: wrap; justify-content: center; border-radius: 20px; }
+    .tab { padding: 0.6rem 1rem; font-size: 0.95rem; }
+    .tab:not(:last-child)::after { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="blob c"></div>
+
+  <div class="container">
+    <!-- 大标题 -->
+    <div class="title-wrap">
+      <div class="title-glass glass">
+        <h1>cola-wzb的视频同款资源</h1>
+      </div>
+    </div>
+
+    <!-- 分类标签栏 -->
+    <div class="tabbar-wrap">
+      <nav class="tabbar glass" id="tabbar" aria-label="资源分类"></nav>
+    </div>
+
+    <!-- 资源卡片 -->
+    <div class="grid" id="grid"></div>
+
+    <footer>
+      收集整理自 <a href="#" onclick="return false;">cola-wzb</a> · 点击卡片即可跳转到对应资源链接
+    </footer>
+  </div>
+
+<script>
+/* ============================================================
+   ⚠️ 在这里填写你的资源链接。
+   每个分类是一个数组，数组里的每一项就是一张卡片。
+   把 "url" 改成你要分享的网站链接，把 "title"/"desc" 改成说明即可。
+   按下方格式随意增删。未填写的分类卡片会自动隐藏。
+   ============================================================ */
+const RESOURCES = {
+  "mod": [
+    { title: "replay", desc: "运镜使用", url: "https://modrinth.com/mod/replaymod" },
+    { title: "randomizermod", desc: "随机掉落", url: "https://modrinth.com/mod/randomizermod" },
+    { title: "Would you Rather", desc: "二选一生存，汉化包去网上搜", url: "https://modrinth.com/mod/wyr" },
+  ],
+  "地图": [
+    { title: "随机空岛", desc: "随机空岛生存中使用", url: "https://1848216735.share.123pan.cn/123pan/IRqhvd-7vtx3?pwd=cola#" },
+  ],
+  "材质包": [
+    { title: "文字", desc: "材质包原作者@三硝基汤姆猫", url: "https://pan.baidu.com/s/1nked8Ht7JQi4iv3f1E26yg?pwd=5pen" },
+  ],
+  "整合包": [
+/*  { title: "整合包示例一", desc: "这里放你的整合包分享链接。", url: "https://example.com/pack-1" },
+    { title: "整合包示例二", desc: "链接打开方式会使用新窗口，方便返回本页。", url: "https://example.com/pack-2" },*/
+  ],
+};
+
+const CATEGORIES = ["mod", "地图", "材质包", "整合包"];
+
+/* ============ 渲染分类标签栏 ============ */
+const tabbar = document.getElementById("tabbar");
+CATEGORIES.forEach((cat, i) => {
+  const btn = document.createElement("button");
+  btn.className = "tab" + (i === 0 ? " active" : "");
+  btn.textContent = cat;
+  btn.dataset.cat = cat;
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderGrid(cat);
+  });
+  tabbar.appendChild(btn);
+});
+
+/* ============ 渲染卡片网格 ============ */
+const grid = document.getElementById("grid");
+
+function renderGrid(cat) {
+  const items = RESOURCES[cat] || [];
+  grid.innerHTML = "";
+
+  if (items.length === 0) {
+    grid.innerHTML = `<div class="empty"><span>📭</span>该分类暂无资源，<br/>请在 <b>index.html</b> 的 RESOURCES 里添加。</div>`;
+    return;
+  }
+
+  items.forEach(item => {
+    const card = document.createElement("a");
+    card.className = "card glass";
+    card.href = item.url || "#";
+    card.target = "_blank";
+    card.rel = "noopener noreferrer";
+    card.innerHTML = `
+      <span class="badge">${cat}</span>
+      <span class="arrow">↗</span>
+      <h3>${item.title}</h3>
+      <p>${item.desc}</p>
+      <span class="open">访问资源</span>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* 默认展示第一个分类 */
+renderGrid(CATEGORIES[0]);
+</script>
+</body>
+</html>
